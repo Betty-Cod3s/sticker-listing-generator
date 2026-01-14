@@ -3,659 +3,718 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amazon Title Optimizer | CEYBO Tools</title>
-  <meta name="description" content="Bulk optimize Amazon product titles for better search visibility. Upload your inventory, select a strategy, download optimized titles.">
+  <title>MadeToStick Listing Generator</title>
   
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles.css">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+  <style>
+    :root {
+      --bg-dark: #0f0f0f;
+      --bg-card: #1a1a1a;
+      --bg-input: #252525;
+      --bg-hover: #2a2a2a;
+      --accent: #f97316;
+      --accent-glow: rgba(249, 115, 22, 0.2);
+      --accent-secondary: #fb923c;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --border: #2e2e2e;
+      --success: #22c55e;
+      --warning: #eab308;
+      --error: #ef4444;
+      --font-sans: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-dark);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header__icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    
+    .header__title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header__subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* Form Panel */
+    .form-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      height: fit-content;
+      position: sticky;
+      top: 1rem;
+    }
+
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-section__title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn--primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn--primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    .btn--secondary {
+      background: var(--bg-input);
+      color: var(--text);
+      border: 1px solid var(--border);
+      margin-top: 0.75rem;
+    }
+
+    .btn--secondary:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Output Panel */
+    .output-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: var(--bg-input);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .output-header__title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .output-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .output-actions button {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .output-actions button:hover {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .output-content {
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .output-placeholder {
+      color: var(--text-dim);
+      text-align: center;
+      padding: 4rem 2rem;
+      font-family: var(--font-sans);
+    }
+
+    .output-placeholder__icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Syntax Highlighting */
+    .section-header {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .divider {
+      color: var(--text-dim);
+    }
+
+    .emoji {
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    }
+
+    .label {
+      color: var(--accent-secondary);
+      font-weight: 500;
+    }
+
+    .value {
+      color: var(--text);
+    }
+
+    .chars {
+      color: var(--success);
+    }
+
+    .note {
+      color: var(--warning);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      color: var(--success);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header class="header">
-      <div class="header__logo">🎯</div>
-      <h1 class="header__title">Amazon Title Optimizer</h1>
-      <p class="header__subtitle">Bulk optimize product titles for better search visibility</p>
-      <span class="header__badge">CEYBO Tools</span>
+      <div class="header__icon">🎯</div>
+      <h1 class="header__title">MadeToStick Listing Generator</h1>
+      <p class="header__subtitle">Fandom Sticker Amazon Listings • Cultural Intelligence Built In</p>
     </header>
 
-    <!-- Step 1: File Upload -->
-    <section class="section">
-      <div class="section__header">
-        <span class="section__step">1</span>
-        <h2 class="section__title">Upload Your Inventory</h2>
-      </div>
-      
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
-        <div class="drop-zone__icon">📁</div>
-        <p class="drop-zone__text">
-          <strong>Click to browse</strong> or drag & drop your file
-        </p>
-        <p class="drop-zone__formats">Supports .csv and .xlsx files</p>
-      </div>
-      
-      <div class="file-info hidden" id="fileInfo">
-        <span class="file-info__icon">📄</span>
-        <div class="file-info__details">
-          <div class="file-info__name" id="fileName">inventory.xlsx</div>
-          <div class="file-info__rows" id="rowCount">0 rows detected</div>
+    <div class="layout">
+      <!-- Input Form -->
+      <div class="form-panel">
+        <div class="form-section">
+          <div class="form-section__title">📦 Product Details</div>
+          
+          <div class="form-group">
+            <label>Subject / Artist Name</label>
+            <input type="text" id="artistName" placeholder="e.g., Juan Gabriel">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pack Size</label>
+              <select id="packSize">
+                <option value="3-Pack">3-Pack</option>
+                <option value="5-Pack">5-Pack</option>
+                <option value="Single">Single</option>
+                <option value="10-Pack">10-Pack</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Sticker Size</label>
+              <input type="text" id="stickerSize" placeholder="e.g., 3&quot; x 3&quot;" value="SIZE TBD">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Art Style</label>
+            <select id="artStyle">
+              <option value="Kawaii Chibi">Kawaii Chibi</option>
+              <option value="Cartoon">Cartoon</option>
+              <option value="Vintage">Vintage</option>
+              <option value="Minimalist">Minimalist</option>
+            </select>
+          </div>
         </div>
-        <button class="file-info__clear" id="resetBtn" title="Remove file">✕</button>
-      </div>
-    </section>
 
-    <!-- Step 2: Strategy Selection -->
-    <section class="section">
-      <div class="section__header">
-        <span class="section__step">2</span>
-        <h2 class="section__title">Select Optimization Strategy</h2>
-      </div>
-      
-      <div class="strategy-options">
-        <!-- OEM Premium -->
-        <label class="strategy-option">
-          <input type="radio" name="strategy" value="oem_premium">
-          <div class="strategy-option__content">
-            <div class="strategy-option__title">OEM Premium</div>
-            <div class="strategy-option__desc">Part number first, brand focus — best for known OEM parts</div>
-            <div class="strategy-option__example">BN59-01178B Remote Control for Samsung UN55F6300 TV - OEM Replacement...</div>
+        <div class="form-section">
+          <div class="form-section__title">🎭 Cultural Context</div>
+          
+          <div class="form-group">
+            <label>Fan Nicknames (comma-separated)</label>
+            <input type="text" id="nicknames" placeholder="e.g., Juanga, El Divo de Juárez, El Divo">
           </div>
-        </label>
-        
-        <!-- Compatible (Default) -->
-        <label class="strategy-option selected">
-          <input type="radio" name="strategy" value="compatible" checked>
-          <div class="strategy-option__content">
-            <div class="strategy-option__title">Compatible Mid-Range</div>
-            <div class="strategy-option__desc">"Compatible with..." positioning — balanced approach for third-party</div>
-            <div class="strategy-option__example">Remote Control Compatible with Samsung UN55F6300 TV (BN59-01178B)...</div>
-          </div>
-        </label>
-        
-        <!-- Universal Budget -->
-        <label class="strategy-option">
-          <input type="radio" name="strategy" value="universal_budget">
-          <div class="strategy-option__content">
-            <div class="strategy-option__title">Universal Budget</div>
-            <div class="strategy-option__desc">Generic, broad compatibility — maximum reach for budget products</div>
-            <div class="strategy-option__example">Universal TV Remote Control for Samsung UN55F6300 - Compatible...</div>
-          </div>
-        </label>
-      </div>
-      
-      <!-- Toggle Options -->
-      <div class="toggle-options">
-        <label class="toggle-option">
-          <input type="checkbox" id="includeSpanish">
-          <span class="toggle-option__label">
-            Include Spanish keywords
-            <span>| Control Remoto</span>
-          </span>
-        </label>
-        
-        <label class="toggle-option">
-          <input type="checkbox" id="mobileOptimized">
-          <span class="toggle-option__label">
-            Mobile-optimized
-            <span>(150 char priority)</span>
-          </span>
-        </label>
-      </div>
-    </section>
 
-    <!-- Step 3: Generate -->
-    <section class="section">
-      <div class="section__header">
-        <span class="section__step">3</span>
-        <h2 class="section__title">Generate & Download</h2>
-      </div>
-      
-      <div class="button-group">
-        <button class="btn btn--primary btn--full" id="generateBtn" disabled>
-          ⚡ Generate Titles
+          <div class="form-group">
+            <label>Iconic Songs / Phrases (comma-separated)</label>
+            <textarea id="iconicPhrases" placeholder="e.g., Amor Eterno, Querida, Hasta Que Te Conocí"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Emotional Core</label>
+            <textarea id="emotionalCore" placeholder="What does this artist mean to fans? What emotions do they evoke?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Target Demographic</label>
+            <input type="text" id="targetDemo" placeholder="e.g., Millennial Latinx adults 28-50">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section__title">🎨 Design Elements</div>
+          
+          <div class="form-group">
+            <label>Signature Visual Elements</label>
+            <textarea id="designElements" placeholder="e.g., flamboyant outfits, expressive face, signature poses"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Iconic Imagery Reference (optional)</label>
+            <input type="text" id="iconicImagery" placeholder="e.g., Bellas Artes concert, white suit era">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section__title">⚠️ Strategic Notes</div>
+          
+          <div class="form-group">
+            <label>Trademark / Legal Considerations</label>
+            <textarea id="trademarkNotes" placeholder="Any trademark risks or estate considerations?"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn--primary" onclick="generateListing()">
+          ⚡ Generate Listing
         </button>
-        <button class="btn btn--secondary btn--full" id="downloadBtn" disabled>
-          💾 Download Optimized File
+        <button class="btn btn--secondary" onclick="loadExample()">
+          📋 Load Juan Gabriel Example
         </button>
       </div>
-      
-      <div class="status-message status-info" id="statusMessage">
-        Ready — upload your inventory file to begin
-      </div>
-    </section>
 
-    <!-- Results Section -->
-    <section class="section results hidden" id="resultsSection">
-      <div class="results__header">
-        <h3 class="results__title">✅ Optimization Results</h3>
-      </div>
-      
-      <div class="results__grid">
-        <div class="stat-card">
-          <div class="stat-card__value stat-card__value--info" id="totalOptimized">0</div>
-          <div class="stat-card__label">Total Optimized</div>
+      <!-- Output Panel -->
+      <div class="output-panel">
+        <div class="output-header">
+          <div class="output-header__title">
+            📄 Generated Listing
+          </div>
+          <div class="output-actions">
+            <button onclick="copyToClipboard()">📋 Copy All</button>
+            <button onclick="downloadAsText()">💾 Download .txt</button>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card__value stat-card__value--success" id="validCount">0</div>
-          <div class="stat-card__label">Valid ✓</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card__value stat-card__value--warning" id="warningCount">0</div>
-          <div class="stat-card__label">Warnings ⚠</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card__value stat-card__value--error" id="errorCount">0</div>
-          <div class="stat-card__label">Errors ✕</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card__value" id="avgLength">0</div>
-          <div class="stat-card__label">Avg. Length</div>
+        <div class="output-content" id="outputContent">
+          <div class="output-placeholder">
+            <div class="output-placeholder__icon">🎯</div>
+            <p>Fill in the form and click Generate<br>to create your Amazon listing</p>
+          </div>
         </div>
       </div>
-      
-      <div class="error-details hidden" id="errorDetails"></div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>Amazon Title Optimizer v1.0 • Built for <strong>CEYBO</strong></p>
-      <p class="mt-1">
-        Your data never leaves your browser • 
-        <a href="https://github.com" target="_blank">View on GitHub</a>
-      </p>
-    </footer>
+    </div>
   </div>
 
-  <!-- Application Script -->
-  <script type="module">
-    // ========================================
-    // INLINE APP.JS (for single-file deployment)
-    // ========================================
-    
-    // ---------- Keywords Module ----------
-    const spanishTranslations = {
-      "remote control": "control remoto",
-      "replacement": "reemplazo",
-      "universal": "universal",
-      "compatible": "compatible"
-    };
+  <div class="toast" id="toast">✅ Copied to clipboard!</div>
 
-    function appendSpanishKeywords(title) {
-      let spanishAppend = '';
-      
-      if (title.toLowerCase().includes('remote control') || title.toLowerCase().includes('remote')) {
-        spanishAppend = 'Control Remoto';
-      }
-      if (title.toLowerCase().includes('replacement')) {
-        spanishAppend += spanishAppend ? ' Reemplazo' : 'Reemplazo';
-      }
-      if (title.toLowerCase().includes('compatible')) {
-        spanishAppend += spanishAppend ? ' Compatible' : 'Compatible';
-      }
-      
-      return spanishAppend ? `${title} | ${spanishAppend}` : title;
-    }
+  <script>
+    // ============================================
+    // MadeToStick Listing Generator
+    // ============================================
 
-    // ---------- Templates Module ----------
-    const columnMappings = {
-      sku: ['sku', 'SKU', 'Sku', 'item_sku', 'ItemSKU'],
-      partNumber: ['part_number', 'Part Number', 'PartNumber', 'part#', 'Part#', 'MPN'],
-      brand: ['brand', 'Brand', 'BRAND', 'manufacturer', 'Manufacturer'],
-      model: ['model', 'Model', 'MODEL', 'model_name', 'ModelName'],
-      currentTitle: ['current_title', 'Current Title', 'CurrentTitle', 'title', 'Title', 'item_name', 'ItemName'],
-      priceTier: ['price_tier', 'Price Tier', 'PriceTier', 'tier', 'Tier']
-    };
-
-    function normalizeRow(row) {
-      const normalized = {};
-      for (const [standardName, variants] of Object.entries(columnMappings)) {
-        for (const variant of variants) {
-          if (row.hasOwnProperty(variant) && row[variant] !== undefined && row[variant] !== '') {
-            normalized[standardName] = row[variant];
-            break;
-          }
-        }
-        if (!normalized[standardName]) normalized[standardName] = '';
-      }
-      for (const [key, value] of Object.entries(row)) {
-        if (!Object.values(columnMappings).flat().includes(key)) {
-          normalized[key] = value;
-        }
-      }
-      return normalized;
-    }
-
-    function cleanData(data) {
-      return {
-        sku: (data.sku || '').toString().trim(),
-        partNumber: (data.partNumber || '').toString().trim(),
-        brand: (data.brand || '').toString().trim(),
-        model: (data.model || '').toString().trim(),
-        currentTitle: (data.currentTitle || '').toString().trim(),
-        priceTier: (data.priceTier || '').toString().trim().toLowerCase()
+    function generateListing() {
+      const data = {
+        artistName: document.getElementById('artistName').value.trim(),
+        packSize: document.getElementById('packSize').value,
+        stickerSize: document.getElementById('stickerSize').value.trim() || 'SIZE TBD',
+        artStyle: document.getElementById('artStyle').value,
+        nicknames: document.getElementById('nicknames').value.trim(),
+        iconicPhrases: document.getElementById('iconicPhrases').value.trim(),
+        emotionalCore: document.getElementById('emotionalCore').value.trim(),
+        targetDemo: document.getElementById('targetDemo').value.trim(),
+        designElements: document.getElementById('designElements').value.trim(),
+        iconicImagery: document.getElementById('iconicImagery').value.trim(),
+        trademarkNotes: document.getElementById('trademarkNotes').value.trim()
       };
+
+      if (!data.artistName) {
+        alert('Please enter an artist/subject name');
+        return;
+      }
+
+      const listing = buildListing(data);
+      document.getElementById('outputContent').innerHTML = `<pre>${escapeHtml(listing)}</pre>`;
     }
 
-    function oemPremiumTemplate(rawData) {
-      const data = cleanData(rawData);
-      const parts = [];
+    function buildListing(d) {
+      const nicknamesList = d.nicknames ? d.nicknames.split(',').map(n => n.trim()) : [d.artistName];
+      const primaryNickname = nicknamesList[0] || d.artistName;
+      const secondaryNickname = nicknamesList[1] || '';
+      const phrasesList = d.iconicPhrases ? d.iconicPhrases.split(',').map(p => p.trim()) : [];
+      const primaryPhrase = phrasesList[0] || '';
+
+      // Generate titles
+      const titles = generateTitles(d, nicknamesList);
       
-      if (data.partNumber) {
-        parts.push(data.partNumber, 'Remote Control');
-      } else {
-        parts.push('OEM Remote Control');
-      }
+      // Generate bullets
+      const bullets = generateBullets(d, primaryNickname, primaryPhrase);
       
-      if (data.brand || data.model) {
-        parts.push('for');
-        if (data.brand) parts.push(data.brand);
-        if (data.model) parts.push(data.model);
-        if (!parts.join(' ').toLowerCase().includes('tv')) parts.push('TV');
-      }
-      
-      parts.push('- OEM Replacement');
-      if (data.brand) parts.push(`Compatible with ${data.brand} Smart TV`);
-      
-      return parts.join(' ');
+      // Generate backend terms
+      const backendTerms = generateBackendTerms(d, nicknamesList, phrasesList);
+
+      return `**🎯 MADETOSTICK AMAZON LISTING**
+
+${d.artistName} (${nicknamesList.slice(0, 2).join(' / ')}) ${d.packSize} ${d.artStyle} Stickers
+
+📊 CULTURAL INTELLIGENCE CHECK
+
+Fan Nicknames
+
+${nicknamesList.map(n => `> • ${n}`).join('\n')}
+
+Iconic Phrases
+
+${phrasesList.length > 0 ? phrasesList.map(p => `> • "${p}"`).join('\n') : '> • [Add iconic songs/phrases]'}
+
+Emotional Core
+
+> *${d.emotionalCore || '[Describe what this artist means to fans]'}*
+
+Target Demo
+
+> ${d.targetDemo || '[Define target demographic]'}
+
+📝 TITLE VARIATIONS
+
+  -------------------- ------------------------------------------------- -----------
+  **TYPE**             **TITLE**                                         **CHARS**
+
+${titles.map((t, i) => `  ${t.label.padEnd(20)} ${t.title.substring(0, 49).padEnd(49)} ${String(t.chars).padEnd(11)}`).join('\n')}
+  -------------------- ------------------------------------------------- -----------
+
+💎 BULLET POINTS
+
+*(Formatted for Title #1: General Best Seller)*
+
+${bullets}
+
+🔍 BACKEND SEARCH TERMS
+
+*(Copy/paste directly into Seller Central - ${backendTerms.split(',').length} terms)*
+
+  -----------------------------------------------------------------------
+  ${backendTerms}
+  -----------------------------------------------------------------------
+
+💡 STRATEGIC NOTES
+
+  -----------------------------------------------------------------------
+  ${d.trademarkNotes || `[Add trademark and strategic considerations for ${d.artistName}]`}
+  
+  ⚠️ SIZE NOTE: Dimensions are placeholder—update all size references 
+  once final dimensions are confirmed.
+  -----------------------------------------------------------------------
+
+⚡ QUICK REFERENCE
+
+  ---------------------- ------------------------------------------------
+  Product                ${d.packSize} ${d.artStyle} Vinyl Stickers
+
+  Size                   ${d.stickerSize} each (die-cut)
+
+  Material               Premium vinyl with laminate coating
+
+  Features               Waterproof, UV-resistant, dishwasher safe,
+                         no-residue removal
+
+  Subject                ${d.artistName}
+  ---------------------- ------------------------------------------------
+
+Generated by MadeToStick Listing Generator • Ready for Seller Central Upload`;
     }
 
-    function compatibleTemplate(rawData) {
-      const data = cleanData(rawData);
-      const parts = ['Remote Control Compatible with'];
-      
-      if (data.brand) parts.push(data.brand);
-      if (data.model) parts.push(data.model);
-      if (!parts.join(' ').toLowerCase().includes('tv')) parts.push('TV');
-      if (data.partNumber) parts.push(`(${data.partNumber})`);
-      parts.push('- Universal Replacement for Smart TV');
-      
-      return parts.join(' ');
+    function generateTitles(d, nicknames) {
+      const primary = nicknames[0] || d.artistName;
+      const secondary = nicknames[1] || '';
+      const size = d.stickerSize;
+      const pack = d.packSize;
+      const style = d.artStyle;
+      const imagery = d.iconicImagery;
+
+      const titles = [];
+
+      // 1. Nickname-Forward (Recommended)
+      let t1 = `${primary}${secondary ? ' ' + secondary : ''} Cartoon Stickers - ${d.artistName} Tribute Art - Waterproof UV Resistant Vinyl Decals for Laptops, Cars, Water Bottles (${pack}, ${size})`;
+      titles.push({ label: '1️⃣ NICKNAME-FORWARD (Recommended)', title: t1, chars: t1.length });
+
+      // 2. Iconic Imagery Hook
+      let t2 = imagery 
+        ? `${secondary || primary} ${imagery} - ${primary} ${style} Tribute Stickers - Waterproof Fadeproof UV Resistant Vinyl for Laptops, Cars, Tumblers (${pack}, ${size})`
+        : `${secondary || primary} Legend - ${primary} ${style} Tribute Stickers - Waterproof Fadeproof UV Resistant Vinyl for Laptops, Cars, Tumblers (${pack}, ${size})`;
+      titles.push({ label: '2️⃣ ICONIC IMAGERY', title: t2, chars: t2.length });
+
+      // 3. Gift Angle
+      let t3 = `${primary} Cartoon Sticker Pack - ${secondary || d.artistName} Tribute Art Regalo - Waterproof UV Resistant Vinyl Decals for Fans, Laptops, Cars (${pack}, ${size})`;
+      titles.push({ label: '3️⃣ GIFT ANGLE', title: t3, chars: t3.length });
+
+      // 4. Emotional/Memorial
+      let t4 = `${secondary || primary} Forever - ${primary} Memorial Tribute Stickers - Waterproof Fadeproof UV Resistant Vinyl for Laptops, Water Bottles, Cars (${pack}, ${size})`;
+      titles.push({ label: '4️⃣ EMOTIONAL/MEMORIAL', title: t4, chars: t4.length });
+
+      // 5. Art Style Forward
+      let t5 = `Adorable ${style} ${primary} Stickers - ${secondary || d.artistName} Kawaii Tribute Art - Waterproof UV Resistant Vinyl Decals for Laptops, Cars (${pack}, ${size})`;
+      titles.push({ label: '5️⃣ ART STYLE FORWARD', title: t5, chars: t5.length });
+
+      return titles;
     }
 
-    function universalBudgetTemplate(rawData) {
-      const data = cleanData(rawData);
-      const parts = ['Universal TV Remote Control'];
+    function generateBullets(d, nickname, phrase) {
+      const phraseMention = phrase ? `every time ${phrase} plays` : 'their music plays';
       
-      if (data.brand || data.model) {
-        parts.push('for');
-        if (data.brand) parts.push(data.brand);
-        if (data.model) parts.push(data.model);
-      }
-      
-      parts.push('- Compatible Replacement');
-      if (data.partNumber) parts.push(data.partNumber);
-      
-      return parts.join(' ');
+      return `**【STICKS THROUGH EVERYTHING】**
+
+> Rain, dishwashers, sun, cafecito spills—these stickers laugh at all
+> of it. Premium vinyl with laminate coating plus UV resistant ink means
+> your ${nickname} tribute stays looking fresh for years on car windows,
+> bumpers, or anywhere the sun beats down.
+
+**【PERFECT SIZE TO SHOW YOUR LOVE】**
+
+> Each die-cut sticker is big enough to appreciate the cute ${d.artStyle.toLowerCase()}
+> details but fits perfectly on laptops, water bottles, car windows,
+> planners, or wherever you want to rep ${nickname}.
+
+**【MAKES MAMÁ CRY (IN A GOOD WAY)】**
+
+> Looking for a regalo that actually means something? For the fan who
+> ugly-cries every time ${phraseMention}, who grew up with ${nickname}
+> as the soundtrack to family gatherings. She'll get it.
+
+**【ARTWORK THAT CAPTURES THEIR SPIRIT】**
+
+> Adorable ${d.artStyle.toLowerCase()} style with ${d.designElements || 'signature style and unmistakable presence'}. 
+> This isn't generic celebrity art—it's a fan tribute that captures 
+> the joy and sentimiento they brought to everything.
+
+**【STICKS STRONG, REMOVES CLEAN】**
+
+> Goes on smooth, stays put for years, and peels off without leaving
+> gross residue when you're ready to switch things up. No commitment
+> issues here.`;
     }
 
-    function generateTitle(strategy, data) {
-      switch (strategy) {
-        case 'oem_premium': return oemPremiumTemplate(data);
-        case 'compatible': return compatibleTemplate(data);
-        case 'universal_budget': return universalBudgetTemplate(data);
-        default: return compatibleTemplate(data);
-      }
-    }
-
-    // ---------- Validator Module ----------
-    const validationConfig = {
-      maxLength: 200,
-      warningLength: 180,
-      minLength: 60,
-      mobileOptimalLength: 150,
-      prohibitedTerms: ['best', 'perfect', '#1', 'number one', 'top rated', 'cheapest', 'free shipping', 'sale', 'discount']
-    };
-
-    function validateTitle(title, options = {}) {
-      const { mobileOptimized = false } = options;
-      const result = {
-        isValid: true,
-        charCount: title.length,
-        status: '✅',
-        warnings: [],
-        errors: []
-      };
+    function generateBackendTerms(d, nicknames, phrases) {
+      const terms = [];
       
-      if (title.length > validationConfig.maxLength) {
-        result.errors.push(`Too long: ${title.length}/${validationConfig.maxLength}`);
-        result.isValid = false;
-        result.status = '❌';
-      } else if (title.length > validationConfig.warningLength) {
-        result.warnings.push(`Approaching limit: ${title.length}`);
-        if (result.status === '✅') result.status = '⚠️';
-      }
-      
-      if (title.length < validationConfig.minLength) {
-        result.warnings.push(`Short title: ${title.length} chars`);
-        if (result.status === '✅') result.status = '⚠️';
-      }
-      
-      for (const term of validationConfig.prohibitedTerms) {
-        if (title.toLowerCase().includes(term.toLowerCase())) {
-          result.errors.push(`Prohibited: "${term}"`);
-          result.isValid = false;
-          result.status = '❌';
+      // Artist name variations
+      terms.push(`${d.artistName} sticker`);
+      nicknames.forEach(n => {
+        if (n !== d.artistName) {
+          terms.push(`${n} sticker`);
+          terms.push(`${n} decal`);
         }
-      }
+      });
       
-      return result;
+      // Product terms
+      terms.push(`${d.artistName} vinyl decal`);
+      terms.push(`${d.artistName} tribute`);
+      terms.push(`${d.artistName} cartoon`);
+      terms.push(`${d.artistName} ${d.artStyle.toLowerCase()}`);
+      terms.push(`${d.artistName} fan art`);
+      
+      // Songs/phrases as search terms
+      phrases.forEach(p => {
+        terms.push(`${p} sticker`);
+        terms.push(`${p} ${d.artistName}`);
+      });
+      
+      // Spanish terms
+      terms.push(`calcomanía ${d.artistName}`);
+      terms.push('sticker mexicano musica');
+      
+      // Generic terms
+      terms.push('Latin music legend decal');
+      terms.push('regional mexicano vinyl');
+      terms.push(`${nicknames[0]} memorial tribute`);
+
+      return terms.join(', ');
     }
 
-    function batchValidate(titles, options = {}) {
-      const results = titles.map(title => validateTitle(title, options));
-      return {
-        total: titles.length,
-        valid: results.filter(r => r.isValid).length,
-        warnings: results.filter(r => r.status === '⚠️').length,
-        errors: results.filter(r => r.status === '❌').length,
-        avgLength: Math.round(results.reduce((sum, r) => sum + r.charCount, 0) / titles.length),
-        results
-      };
+    function loadExample() {
+      document.getElementById('artistName').value = 'Juan Gabriel';
+      document.getElementById('packSize').value = '3-Pack';
+      document.getElementById('stickerSize').value = 'SIZE TBD';
+      document.getElementById('artStyle').value = 'Kawaii Chibi';
+      document.getElementById('nicknames').value = 'Juanga, El Divo de Juárez, El Divo, Alberto Aguilera Valadez';
+      document.getElementById('iconicPhrases').value = 'Amor Eterno, Querida, Hasta Que Te Conocí, Lo pasado pasado, Noa Noa';
+      document.getElementById('emotionalCore').value = 'Juan Gabriel represents pure Mexican sentimiento—flamboyant, unapologetic, and deeply emotional. His death in 2016 stopped the country. Fans see him as the voice of every heartbreak, every mother\'s love, every moment of joy and pain rolled into one.';
+      document.getElementById('targetDemo').value = 'Millennial Latinx adults 28-50, particularly those with strong ties to Mexican culture and family traditions; LGBTQ+ fans who saw him as a trailblazing icon of self-expression';
+      document.getElementById('designElements').value = 'flamboyant outfits, expressive face, unmistakable presence, signature gestures';
+      document.getElementById('iconicImagery').value = 'in Bellas Artes';
+      document.getElementById('trademarkNotes').value = 'Juan Gabriel is arguably the safest single-artist choice for trademark concerns—his estate is less aggressive than Selena\'s, and "Juanga" and "El Divo de Juárez" are fan-coined nicknames rather than trademarked terms. The Bellas Artes reference is iconic—his legendary 1990 concert there is considered a cultural milestone. His LGBTQ+ icon status adds a secondary audience beyond traditional regional mexicano fans. Lead with the nicknames, save the full name for backend.';
     }
 
-    function truncateTitle(title, maxLength = 200) {
-      if (title.length <= maxLength) return title;
-      const truncated = title.substring(0, maxLength);
-      const lastBreak = Math.max(truncated.lastIndexOf(' '), truncated.lastIndexOf('-'), truncated.lastIndexOf(','));
-      return lastBreak > maxLength - 30 ? truncated.substring(0, lastBreak).trim() : truncated.trim();
-    }
-
-    function sanitizeTitle(title) {
-      return title.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').replace(/[<>{}[\]\\^~`]/g, '').trim();
-    }
-
-    // ---------- Parser Functions ----------
-    async function parseCSV(file) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(file, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => resolve(results.data.map(normalizeRow)),
-          error: (error) => reject(new Error(`CSV error: ${error.message}`))
-        });
+    function copyToClipboard() {
+      const content = document.getElementById('outputContent').innerText;
+      navigator.clipboard.writeText(content).then(() => {
+        showToast();
       });
     }
 
-    async function parseExcel(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
-            resolve(jsonData.map(normalizeRow));
-          } catch (error) {
-            reject(new Error(`Excel error: ${error.message}`));
-          }
-        };
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    async function parseFile(file) {
-      const name = file.name.toLowerCase();
-      if (name.endsWith('.csv')) return parseCSV(file);
-      if (name.endsWith('.xlsx') || name.endsWith('.xls')) return parseExcel(file);
-      throw new Error('Unsupported format. Use .csv or .xlsx');
-    }
-
-    function generateCSV(data) {
-      return Papa.unparse(data, { header: true, quotes: true });
-    }
-
-    function generateExcel(data) {
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      worksheet['!cols'] = [{ wch: 15 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }, { wch: 60 }, { wch: 12 }, { wch: 8 }];
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Optimized Titles');
-      const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      return new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    }
-
-    function downloadFile(content, fileName, mimeType) {
-      const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+    function downloadAsText() {
+      const content = document.getElementById('outputContent').innerText;
+      const artistName = document.getElementById('artistName').value.trim() || 'listing';
+      const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MadeToStick-${artistName.replace(/\s+/g, '-')}-Listing.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
-    function getOutputFileName(inputName) {
-      const lastDot = inputName.lastIndexOf('.');
-      if (lastDot === -1) return inputName + '_optimized';
-      return `${inputName.substring(0, lastDot)}_optimized${inputName.substring(lastDot)}`;
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    // ---------- Application State ----------
-    const state = {
-      inputFile: null,
-      inputFileName: '',
-      parsedData: [],
-      optimizedData: [],
-      strategy: 'compatible',
-      includeSpanish: false,
-      mobileOptimized: false,
-      isProcessing: false
-    };
-
-    // ---------- UI Functions ----------
-    function showStatus(message, type = 'info') {
-      const el = document.getElementById('statusMessage');
-      if (el) {
-        el.textContent = message;
-        el.className = `status-message status-${type}`;
-      }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
-
-    function updateUIState() {
-      const hasFile = state.parsedData.length > 0;
-      const hasResults = state.optimizedData.length > 0;
-      document.getElementById('generateBtn').disabled = !hasFile || state.isProcessing;
-      document.getElementById('downloadBtn').disabled = !hasResults;
-    }
-
-    function updateResultsSummary(validation) {
-      document.getElementById('totalOptimized').textContent = validation.total;
-      document.getElementById('validCount').textContent = validation.valid;
-      document.getElementById('warningCount').textContent = validation.warnings;
-      document.getElementById('errorCount').textContent = validation.errors;
-      document.getElementById('avgLength').textContent = validation.avgLength;
-      
-      const errorDetails = document.getElementById('errorDetails');
-      if (validation.errors > 0 && errorDetails) {
-        const errorRows = validation.results
-          .map((r, i) => ({ ...r, index: i }))
-          .filter(r => r.status === '❌')
-          .slice(0, 5);
-        errorDetails.innerHTML = errorRows.map(r => 
-          `<div class="error-item">Row ${r.index + 1}: ${r.errors.join(', ')}</div>`
-        ).join('');
-        errorDetails.classList.remove('hidden');
-      } else {
-        errorDetails?.classList.add('hidden');
-      }
-    }
-
-    // ---------- Event Handlers ----------
-    async function processFile(file) {
-      showStatus('Processing file...', 'info');
-      try {
-        state.inputFile = file;
-        state.inputFileName = file.name;
-        state.parsedData = await parseFile(file);
-        
-        document.getElementById('fileName').textContent = file.name;
-        document.getElementById('rowCount').textContent = `${state.parsedData.length} rows detected`;
-        document.getElementById('fileInfo').classList.remove('hidden');
-        
-        showStatus(`Loaded ${state.parsedData.length} products from ${file.name}`, 'success');
-        updateUIState();
-      } catch (error) {
-        showStatus(`Error: ${error.message}`, 'error');
-        console.error(error);
-      }
-    }
-
-    async function handleGenerate() {
-      if (state.parsedData.length === 0) {
-        showStatus('Please upload a file first', 'error');
-        return;
-      }
-      
-      if (state.isProcessing) return;
-      
-      state.isProcessing = true;
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Processing...';
-      
-      showStatus('Generating optimized titles...', 'info');
-      
-      try {
-        state.optimizedData = state.parsedData.map(row => {
-          let optimizedTitle = generateTitle(state.strategy, row);
-          if (state.includeSpanish) optimizedTitle = appendSpanishKeywords(optimizedTitle);
-          optimizedTitle = sanitizeTitle(optimizedTitle);
-          const maxLen = state.mobileOptimized ? 150 : 200;
-          optimizedTitle = truncateTitle(optimizedTitle, maxLen);
-          const validation = validateTitle(optimizedTitle, { mobileOptimized: state.mobileOptimized });
-          
-          return {
-            ...row,
-            'Optimized Title': optimizedTitle,
-            'Char Count': validation.charCount,
-            'Status': validation.status
-          };
-        });
-        
-        const titles = state.optimizedData.map(row => row['Optimized Title']);
-        const validation = batchValidate(titles, { mobileOptimized: state.mobileOptimized });
-        
-        updateResultsSummary(validation);
-        showStatus(`Successfully optimized ${state.optimizedData.length} titles!`, 'success');
-        
-        document.getElementById('downloadBtn').disabled = false;
-        document.getElementById('resultsSection').classList.remove('hidden');
-        
-      } catch (error) {
-        showStatus(`Error: ${error.message}`, 'error');
-        console.error(error);
-      } finally {
-        state.isProcessing = false;
-        btn.disabled = false;
-        btn.innerHTML = '⚡ Generate Titles';
-        updateUIState();
-      }
-    }
-
-    function handleDownload() {
-      if (state.optimizedData.length === 0) {
-        showStatus('No data to download', 'error');
-        return;
-      }
-      
-      const outputName = getOutputFileName(state.inputFileName);
-      
-      if (state.inputFileName.toLowerCase().endsWith('.csv')) {
-        downloadFile(generateCSV(state.optimizedData), outputName, 'text/csv');
-      } else {
-        downloadFile(generateExcel(state.optimizedData), outputName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      }
-      
-      showStatus(`Downloaded ${outputName}`, 'success');
-    }
-
-    function handleReset() {
-      state.inputFile = null;
-      state.inputFileName = '';
-      state.parsedData = [];
-      state.optimizedData = [];
-      
-      document.getElementById('fileInput').value = '';
-      document.getElementById('fileInfo').classList.add('hidden');
-      document.getElementById('resultsSection').classList.add('hidden');
-      document.getElementById('downloadBtn').disabled = true;
-      
-      showStatus('Ready — upload your inventory file to begin', 'info');
-      updateUIState();
-    }
-
-    // ---------- Initialize ----------
-    function init() {
-      // File input
-      const fileInput = document.getElementById('fileInput');
-      const dropZone = document.getElementById('dropZone');
-      
-      fileInput?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) processFile(file);
-      });
-      
-      // Drag and drop
-      dropZone?.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-      });
-      
-      dropZone?.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-      });
-      
-      dropZone?.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        const file = e.dataTransfer?.files[0];
-        if (file) processFile(file);
-      });
-      
-      // Strategy selection
-      document.querySelectorAll('input[name="strategy"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-          state.strategy = e.target.value;
-          document.querySelectorAll('.strategy-option').forEach(opt => opt.classList.remove('selected'));
-          e.target.closest('.strategy-option').classList.add('selected');
-        });
-      });
-      
-      // Toggles
-      document.getElementById('includeSpanish')?.addEventListener('change', (e) => {
-        state.includeSpanish = e.target.checked;
-      });
-      
-      document.getElementById('mobileOptimized')?.addEventListener('change', (e) => {
-        state.mobileOptimized = e.target.checked;
-      });
-      
-      // Buttons
-      document.getElementById('generateBtn')?.addEventListener('click', handleGenerate);
-      document.getElementById('downloadBtn')?.addEventListener('click', handleDownload);
-      document.getElementById('resetBtn')?.addEventListener('click', handleReset);
-      
-      console.log('Amazon Title Optimizer initialized');
-    }
-
-    init();
   </script>
 </body>
 </html>
