@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Title Optimizer | CEYBO Tools</title>
+  <meta name="description" content="Bulk optimize Amazon product titles for better search visibility. Upload your inventory, select a strategy, download optimized titles.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header__logo">🎯</div>
+      <h1 class="header__title">Amazon Title Optimizer</h1>
+      <p class="header__subtitle">Bulk optimize product titles for better search visibility</p>
+      <span class="header__badge">CEYBO Tools</span>
+    </header>
+
+    <!-- Step 1: File Upload -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__step">1</span>
+        <h2 class="section__title">Upload Your Inventory</h2>
+      </div>
+      
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+        <div class="drop-zone__icon">📁</div>
+        <p class="drop-zone__text">
+          <strong>Click to browse</strong> or drag & drop your file
+        </p>
+        <p class="drop-zone__formats">Supports .csv and .xlsx files</p>
+      </div>
+      
+      <div class="file-info hidden" id="fileInfo">
+        <span class="file-info__icon">📄</span>
+        <div class="file-info__details">
+          <div class="file-info__name" id="fileName">inventory.xlsx</div>
+          <div class="file-info__rows" id="rowCount">0 rows detected</div>
+        </div>
+        <button class="file-info__clear" id="resetBtn" title="Remove file">✕</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Strategy Selection -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__step">2</span>
+        <h2 class="section__title">Select Optimization Strategy</h2>
+      </div>
+      
+      <div class="strategy-options">
+        <!-- OEM Premium -->
+        <label class="strategy-option">
+          <input type="radio" name="strategy" value="oem_premium">
+          <div class="strategy-option__content">
+            <div class="strategy-option__title">OEM Premium</div>
+            <div class="strategy-option__desc">Part number first, brand focus — best for known OEM parts</div>
+            <div class="strategy-option__example">BN59-01178B Remote Control for Samsung UN55F6300 TV - OEM Replacement...</div>
+          </div>
+        </label>
+        
+        <!-- Compatible (Default) -->
+        <label class="strategy-option selected">
+          <input type="radio" name="strategy" value="compatible" checked>
+          <div class="strategy-option__content">
+            <div class="strategy-option__title">Compatible Mid-Range</div>
+            <div class="strategy-option__desc">"Compatible with..." positioning — balanced approach for third-party</div>
+            <div class="strategy-option__example">Remote Control Compatible with Samsung UN55F6300 TV (BN59-01178B)...</div>
+          </div>
+        </label>
+        
+        <!-- Universal Budget -->
+        <label class="strategy-option">
+          <input type="radio" name="strategy" value="universal_budget">
+          <div class="strategy-option__content">
+            <div class="strategy-option__title">Universal Budget</div>
+            <div class="strategy-option__desc">Generic, broad compatibility — maximum reach for budget products</div>
+            <div class="strategy-option__example">Universal TV Remote Control for Samsung UN55F6300 - Compatible...</div>
+          </div>
+        </label>
+      </div>
+      
+      <!-- Toggle Options -->
+      <div class="toggle-options">
+        <label class="toggle-option">
+          <input type="checkbox" id="includeSpanish">
+          <span class="toggle-option__label">
+            Include Spanish keywords
+            <span>| Control Remoto</span>
+          </span>
+        </label>
+        
+        <label class="toggle-option">
+          <input type="checkbox" id="mobileOptimized">
+          <span class="toggle-option__label">
+            Mobile-optimized
+            <span>(150 char priority)</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 3: Generate -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__step">3</span>
+        <h2 class="section__title">Generate & Download</h2>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn btn--primary btn--full" id="generateBtn" disabled>
+          ⚡ Generate Titles
+        </button>
+        <button class="btn btn--secondary btn--full" id="downloadBtn" disabled>
+          💾 Download Optimized File
+        </button>
+      </div>
+      
+      <div class="status-message status-info" id="statusMessage">
+        Ready — upload your inventory file to begin
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="section results hidden" id="resultsSection">
+      <div class="results__header">
+        <h3 class="results__title">✅ Optimization Results</h3>
+      </div>
+      
+      <div class="results__grid">
+        <div class="stat-card">
+          <div class="stat-card__value stat-card__value--info" id="totalOptimized">0</div>
+          <div class="stat-card__label">Total Optimized</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value stat-card__value--success" id="validCount">0</div>
+          <div class="stat-card__label">Valid ✓</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value stat-card__value--warning" id="warningCount">0</div>
+          <div class="stat-card__label">Warnings ⚠</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value stat-card__value--error" id="errorCount">0</div>
+          <div class="stat-card__label">Errors ✕</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="avgLength">0</div>
+          <div class="stat-card__label">Avg. Length</div>
+        </div>
+      </div>
+      
+      <div class="error-details hidden" id="errorDetails"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Amazon Title Optimizer v1.0 • Built for <strong>CEYBO</strong></p>
+      <p class="mt-1">
+        Your data never leaves your browser • 
+        <a href="https://github.com" target="_blank">View on GitHub</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Application Script -->
+  <script type="module">
+    // ========================================
+    // INLINE APP.JS (for single-file deployment)
+    // ========================================
+    
+    // ---------- Keywords Module ----------
+    const spanishTranslations = {
+      "remote control": "control remoto",
+      "replacement": "reemplazo",
+      "universal": "universal",
+      "compatible": "compatible"
+    };
+
+    function appendSpanishKeywords(title) {
+      let spanishAppend = '';
+      
+      if (title.toLowerCase().includes('remote control') || title.toLowerCase().includes('remote')) {
+        spanishAppend = 'Control Remoto';
+      }
+      if (title.toLowerCase().includes('replacement')) {
+        spanishAppend += spanishAppend ? ' Reemplazo' : 'Reemplazo';
+      }
+      if (title.toLowerCase().includes('compatible')) {
+        spanishAppend += spanishAppend ? ' Compatible' : 'Compatible';
+      }
+      
+      return spanishAppend ? `${title} | ${spanishAppend}` : title;
+    }
+
+    // ---------- Templates Module ----------
+    const columnMappings = {
+      sku: ['sku', 'SKU', 'Sku', 'item_sku', 'ItemSKU'],
+      partNumber: ['part_number', 'Part Number', 'PartNumber', 'part#', 'Part#', 'MPN'],
+      brand: ['brand', 'Brand', 'BRAND', 'manufacturer', 'Manufacturer'],
+      model: ['model', 'Model', 'MODEL', 'model_name', 'ModelName'],
+      currentTitle: ['current_title', 'Current Title', 'CurrentTitle', 'title', 'Title', 'item_name', 'ItemName'],
+      priceTier: ['price_tier', 'Price Tier', 'PriceTier', 'tier', 'Tier']
+    };
+
+    function normalizeRow(row) {
+      const normalized = {};
+      for (const [standardName, variants] of Object.entries(columnMappings)) {
+        for (const variant of variants) {
+          if (row.hasOwnProperty(variant) && row[variant] !== undefined && row[variant] !== '') {
+            normalized[standardName] = row[variant];
+            break;
+          }
+        }
+        if (!normalized[standardName]) normalized[standardName] = '';
+      }
+      for (const [key, value] of Object.entries(row)) {
+        if (!Object.values(columnMappings).flat().includes(key)) {
+          normalized[key] = value;
+        }
+      }
+      return normalized;
+    }
+
+    function cleanData(data) {
+      return {
+        sku: (data.sku || '').toString().trim(),
+        partNumber: (data.partNumber || '').toString().trim(),
+        brand: (data.brand || '').toString().trim(),
+        model: (data.model || '').toString().trim(),
+        currentTitle: (data.currentTitle || '').toString().trim(),
+        priceTier: (data.priceTier || '').toString().trim().toLowerCase()
+      };
+    }
+
+    function oemPremiumTemplate(rawData) {
+      const data = cleanData(rawData);
+      const parts = [];
+      
+      if (data.partNumber) {
+        parts.push(data.partNumber, 'Remote Control');
+      } else {
+        parts.push('OEM Remote Control');
+      }
+      
+      if (data.brand || data.model) {
+        parts.push('for');
+        if (data.brand) parts.push(data.brand);
+        if (data.model) parts.push(data.model);
+        if (!parts.join(' ').toLowerCase().includes('tv')) parts.push('TV');
+      }
+      
+      parts.push('- OEM Replacement');
+      if (data.brand) parts.push(`Compatible with ${data.brand} Smart TV`);
+      
+      return parts.join(' ');
+    }
+
+    function compatibleTemplate(rawData) {
+      const data = cleanData(rawData);
+      const parts = ['Remote Control Compatible with'];
+      
+      if (data.brand) parts.push(data.brand);
+      if (data.model) parts.push(data.model);
+      if (!parts.join(' ').toLowerCase().includes('tv')) parts.push('TV');
+      if (data.partNumber) parts.push(`(${data.partNumber})`);
+      parts.push('- Universal Replacement for Smart TV');
+      
+      return parts.join(' ');
+    }
+
+    function universalBudgetTemplate(rawData) {
+      const data = cleanData(rawData);
+      const parts = ['Universal TV Remote Control'];
+      
+      if (data.brand || data.model) {
+        parts.push('for');
+        if (data.brand) parts.push(data.brand);
+        if (data.model) parts.push(data.model);
+      }
+      
+      parts.push('- Compatible Replacement');
+      if (data.partNumber) parts.push(data.partNumber);
+      
+      return parts.join(' ');
+    }
+
+    function generateTitle(strategy, data) {
+      switch (strategy) {
+        case 'oem_premium': return oemPremiumTemplate(data);
+        case 'compatible': return compatibleTemplate(data);
+        case 'universal_budget': return universalBudgetTemplate(data);
+        default: return compatibleTemplate(data);
+      }
+    }
+
+    // ---------- Validator Module ----------
+    const validationConfig = {
+      maxLength: 200,
+      warningLength: 180,
+      minLength: 60,
+      mobileOptimalLength: 150,
+      prohibitedTerms: ['best', 'perfect', '#1', 'number one', 'top rated', 'cheapest', 'free shipping', 'sale', 'discount']
+    };
+
+    function validateTitle(title, options = {}) {
+      const { mobileOptimized = false } = options;
+      const result = {
+        isValid: true,
+        charCount: title.length,
+        status: '✅',
+        warnings: [],
+        errors: []
+      };
+      
+      if (title.length > validationConfig.maxLength) {
+        result.errors.push(`Too long: ${title.length}/${validationConfig.maxLength}`);
+        result.isValid = false;
+        result.status = '❌';
+      } else if (title.length > validationConfig.warningLength) {
+        result.warnings.push(`Approaching limit: ${title.length}`);
+        if (result.status === '✅') result.status = '⚠️';
+      }
+      
+      if (title.length < validationConfig.minLength) {
+        result.warnings.push(`Short title: ${title.length} chars`);
+        if (result.status === '✅') result.status = '⚠️';
+      }
+      
+      for (const term of validationConfig.prohibitedTerms) {
+        if (title.toLowerCase().includes(term.toLowerCase())) {
+          result.errors.push(`Prohibited: "${term}"`);
+          result.isValid = false;
+          result.status = '❌';
+        }
+      }
+      
+      return result;
+    }
+
+    function batchValidate(titles, options = {}) {
+      const results = titles.map(title => validateTitle(title, options));
+      return {
+        total: titles.length,
+        valid: results.filter(r => r.isValid).length,
+        warnings: results.filter(r => r.status === '⚠️').length,
+        errors: results.filter(r => r.status === '❌').length,
+        avgLength: Math.round(results.reduce((sum, r) => sum + r.charCount, 0) / titles.length),
+        results
+      };
+    }
+
+    function truncateTitle(title, maxLength = 200) {
+      if (title.length <= maxLength) return title;
+      const truncated = title.substring(0, maxLength);
+      const lastBreak = Math.max(truncated.lastIndexOf(' '), truncated.lastIndexOf('-'), truncated.lastIndexOf(','));
+      return lastBreak > maxLength - 30 ? truncated.substring(0, lastBreak).trim() : truncated.trim();
+    }
+
+    function sanitizeTitle(title) {
+      return title.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').replace(/[<>{}[\]\\^~`]/g, '').trim();
+    }
+
+    // ---------- Parser Functions ----------
+    async function parseCSV(file) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => resolve(results.data.map(normalizeRow)),
+          error: (error) => reject(new Error(`CSV error: ${error.message}`))
+        });
+      });
+    }
+
+    async function parseExcel(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+            resolve(jsonData.map(normalizeRow));
+          } catch (error) {
+            reject(new Error(`Excel error: ${error.message}`));
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    async function parseFile(file) {
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.csv')) return parseCSV(file);
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) return parseExcel(file);
+      throw new Error('Unsupported format. Use .csv or .xlsx');
+    }
+
+    function generateCSV(data) {
+      return Papa.unparse(data, { header: true, quotes: true });
+    }
+
+    function generateExcel(data) {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      worksheet['!cols'] = [{ wch: 15 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, { wch: 40 }, { wch: 60 }, { wch: 12 }, { wch: 8 }];
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Optimized Titles');
+      const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      return new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+
+    function downloadFile(content, fileName, mimeType) {
+      const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
+    function getOutputFileName(inputName) {
+      const lastDot = inputName.lastIndexOf('.');
+      if (lastDot === -1) return inputName + '_optimized';
+      return `${inputName.substring(0, lastDot)}_optimized${inputName.substring(lastDot)}`;
+    }
+
+    // ---------- Application State ----------
+    const state = {
+      inputFile: null,
+      inputFileName: '',
+      parsedData: [],
+      optimizedData: [],
+      strategy: 'compatible',
+      includeSpanish: false,
+      mobileOptimized: false,
+      isProcessing: false
+    };
+
+    // ---------- UI Functions ----------
+    function showStatus(message, type = 'info') {
+      const el = document.getElementById('statusMessage');
+      if (el) {
+        el.textContent = message;
+        el.className = `status-message status-${type}`;
+      }
+    }
+
+    function updateUIState() {
+      const hasFile = state.parsedData.length > 0;
+      const hasResults = state.optimizedData.length > 0;
+      document.getElementById('generateBtn').disabled = !hasFile || state.isProcessing;
+      document.getElementById('downloadBtn').disabled = !hasResults;
+    }
+
+    function updateResultsSummary(validation) {
+      document.getElementById('totalOptimized').textContent = validation.total;
+      document.getElementById('validCount').textContent = validation.valid;
+      document.getElementById('warningCount').textContent = validation.warnings;
+      document.getElementById('errorCount').textContent = validation.errors;
+      document.getElementById('avgLength').textContent = validation.avgLength;
+      
+      const errorDetails = document.getElementById('errorDetails');
+      if (validation.errors > 0 && errorDetails) {
+        const errorRows = validation.results
+          .map((r, i) => ({ ...r, index: i }))
+          .filter(r => r.status === '❌')
+          .slice(0, 5);
+        errorDetails.innerHTML = errorRows.map(r => 
+          `<div class="error-item">Row ${r.index + 1}: ${r.errors.join(', ')}</div>`
+        ).join('');
+        errorDetails.classList.remove('hidden');
+      } else {
+        errorDetails?.classList.add('hidden');
+      }
+    }
+
+    // ---------- Event Handlers ----------
+    async function processFile(file) {
+      showStatus('Processing file...', 'info');
+      try {
+        state.inputFile = file;
+        state.inputFileName = file.name;
+        state.parsedData = await parseFile(file);
+        
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('rowCount').textContent = `${state.parsedData.length} rows detected`;
+        document.getElementById('fileInfo').classList.remove('hidden');
+        
+        showStatus(`Loaded ${state.parsedData.length} products from ${file.name}`, 'success');
+        updateUIState();
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+        console.error(error);
+      }
+    }
+
+    async function handleGenerate() {
+      if (state.parsedData.length === 0) {
+        showStatus('Please upload a file first', 'error');
+        return;
+      }
+      
+      if (state.isProcessing) return;
+      
+      state.isProcessing = true;
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Processing...';
+      
+      showStatus('Generating optimized titles...', 'info');
+      
+      try {
+        state.optimizedData = state.parsedData.map(row => {
+          let optimizedTitle = generateTitle(state.strategy, row);
+          if (state.includeSpanish) optimizedTitle = appendSpanishKeywords(optimizedTitle);
+          optimizedTitle = sanitizeTitle(optimizedTitle);
+          const maxLen = state.mobileOptimized ? 150 : 200;
+          optimizedTitle = truncateTitle(optimizedTitle, maxLen);
+          const validation = validateTitle(optimizedTitle, { mobileOptimized: state.mobileOptimized });
+          
+          return {
+            ...row,
+            'Optimized Title': optimizedTitle,
+            'Char Count': validation.charCount,
+            'Status': validation.status
+          };
+        });
+        
+        const titles = state.optimizedData.map(row => row['Optimized Title']);
+        const validation = batchValidate(titles, { mobileOptimized: state.mobileOptimized });
+        
+        updateResultsSummary(validation);
+        showStatus(`Successfully optimized ${state.optimizedData.length} titles!`, 'success');
+        
+        document.getElementById('downloadBtn').disabled = false;
+        document.getElementById('resultsSection').classList.remove('hidden');
+        
+      } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+        console.error(error);
+      } finally {
+        state.isProcessing = false;
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Generate Titles';
+        updateUIState();
+      }
+    }
+
+    function handleDownload() {
+      if (state.optimizedData.length === 0) {
+        showStatus('No data to download', 'error');
+        return;
+      }
+      
+      const outputName = getOutputFileName(state.inputFileName);
+      
+      if (state.inputFileName.toLowerCase().endsWith('.csv')) {
+        downloadFile(generateCSV(state.optimizedData), outputName, 'text/csv');
+      } else {
+        downloadFile(generateExcel(state.optimizedData), outputName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      }
+      
+      showStatus(`Downloaded ${outputName}`, 'success');
+    }
+
+    function handleReset() {
+      state.inputFile = null;
+      state.inputFileName = '';
+      state.parsedData = [];
+      state.optimizedData = [];
+      
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileInfo').classList.add('hidden');
+      document.getElementById('resultsSection').classList.add('hidden');
+      document.getElementById('downloadBtn').disabled = true;
+      
+      showStatus('Ready — upload your inventory file to begin', 'info');
+      updateUIState();
+    }
+
+    // ---------- Initialize ----------
+    function init() {
+      // File input
+      const fileInput = document.getElementById('fileInput');
+      const dropZone = document.getElementById('dropZone');
+      
+      fileInput?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) processFile(file);
+      });
+      
+      // Drag and drop
+      dropZone?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      
+      dropZone?.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+      });
+      
+      dropZone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer?.files[0];
+        if (file) processFile(file);
+      });
+      
+      // Strategy selection
+      document.querySelectorAll('input[name="strategy"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          state.strategy = e.target.value;
+          document.querySelectorAll('.strategy-option').forEach(opt => opt.classList.remove('selected'));
+          e.target.closest('.strategy-option').classList.add('selected');
+        });
+      });
+      
+      // Toggles
+      document.getElementById('includeSpanish')?.addEventListener('change', (e) => {
+        state.includeSpanish = e.target.checked;
+      });
+      
+      document.getElementById('mobileOptimized')?.addEventListener('change', (e) => {
+        state.mobileOptimized = e.target.checked;
+      });
+      
+      // Buttons
+      document.getElementById('generateBtn')?.addEventListener('click', handleGenerate);
+      document.getElementById('downloadBtn')?.addEventListener('click', handleDownload);
+      document.getElementById('resetBtn')?.addEventListener('click', handleReset);
+      
+      console.log('Amazon Title Optimizer initialized');
+    }
+
+    init();
+  </script>
+</body>
+</html>
